@@ -25,7 +25,7 @@ def extract_urls(url, extensions=None):
 
 
 def print_banner():
-    banner = """
+    banner = r"""
   _   _ ___ _      ___     _               _           
  | | | | _ \ |    | __|_ _| |_ _ _ __ _ __| |_ ___ _ _ 
  | |_| |   / |__  | _|\ \ /  _| '_/ _` / _|  _/ _ \ '_|
