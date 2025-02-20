@@ -1,12 +1,32 @@
 import argparse
 import requests
+import warnings
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin
 from termcolor import colored
 
+warnings.simplefilter('ignore', category=requests.packages.urllib3.exceptions.InsecureRequestWarning)
 
+def detect_scheme(url):
+    parsed_url = urlparse(url)
+    if not parsed_url.scheme:
+        test_url = "https://" + url
+        try:
+            response = requests.head(test_url, timeout=3, allow_redirects=True, verify=False)
+            if response.status_code < 400:
+                return test_url
+        except requests.RequestException:
+            pass
+        return "http://" + url
+    return url
 def extract_urls(url, extensions=None):
-    response = requests.get(url)
+    try:
+        response = requests.get(url, verify=False)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        print(colored(f"ERROR: Gagal mengakses {url}. Pesan: {e}", "red"))
+        return []
+        
     soup = BeautifulSoup(response.content, 'html.parser')
 
     base_url = response.url
@@ -50,7 +70,8 @@ if __name__ == '__main__':
     else:
         print_banner()
 
-        website_url = args.url
+        website_url = detect_scheme(args.url)
+        print(colored(f"Scanning: {website_url}", "yellow"))
         file_extensions = args.extensions.split(
             ',') if args.extensions else None
 
